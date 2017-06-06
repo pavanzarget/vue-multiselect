@@ -15,10 +15,22 @@
       <div ref="tags" class="multiselect__tags">
         <div class="multiselect__tags-wrap" v-show="visibleValue.length > 0">
           <span v-for="option of visibleValue" @mousedown.prevent class="multiselect__tag">
-            <span v-text="getOptionLabel(option)"></span>
-            <i aria-hidden="true" tabindex="1" @keydown.enter.prevent="removeElement(option)" @mousedown.prevent="removeElement(option)"
-              class="multiselect__tag-icon">
-              </i>
+
+            <div v-if="userOption" class="item-user">
+              <div class="user-head">
+                <i class="thumbnail user-thumb thumbnail-x"></i>
+                <i class="fa fa-close common" aria-hidden="true" tabindex="1" @keydown.enter.prevent="removeElement(option)" @mousedown.prevent="removeElement(option)"></i>
+              </div>
+              <span v-text="getOptionLabel(option)"></span>
+            </div>
+
+            <span v-else>
+              <span v-text="getOptionLabel(option)"></span>
+              <i aria-hidden="true" tabindex="1" @keydown.enter.prevent="removeElement(option)" @mousedown.prevent="removeElement(option)"
+                class="multiselect__tag-icon">
+                </i>
+            </span>
+
           </span>
         </div>
         <template v-if="internalValue && internalValue.length > limit">
@@ -27,26 +39,52 @@
         <transition name="multiselect__loading">
           <slot name="loading"><div v-show="loading" class="multiselect__spinner"></div></slot>
         </transition>
-        <input
-          ref="search"
-          :name="inputName"
-          :id="inputId"
-          type="text"
-          autocomplete="off"
-          :placeholder="placeholder"
-          v-if="searchable"
-          :value="isOpen ? search : currentOptionLabel"
-          :disabled="disabled"
-          @input="updateSearch($event.target.value)"
-          @focus.prevent="activate()"
-          @blur.prevent="deactivate()"
-          @keyup.esc="deactivate()"
-          @keydown.down.prevent="pointerForward()"
-          @keydown.up.prevent="pointerBackward()"
-          @keydown.enter.prevent
-          @keydown.enter.tab.stop.self="addPointerElement($event)"
-          @keydown.delete="removeLastElement()"
-          class="multiselect__input"/>
+        <div v-if="searchable">
+          <div v-if="userOption" class="search-input el-input">
+            <i class="el-input__icon el-icon-search"></i>
+            <input
+            ref="search"
+            :name="inputName"
+            :id="inputId"
+            type="text"
+            autocomplete="off"
+            :placeholder="placeholder"
+            :value="isOpen ? search : currentOptionLabel"
+            :disabled="disabled"
+            @input="updateSearch($event.target.value)"
+            @focus.prevent="activate()"
+            @blur.prevent="deactivate()"
+            @keyup.esc="deactivate()"
+            @keydown.down.prevent="pointerForward()"
+            @keydown.up.prevent="pointerBackward()"
+            @keydown.enter.prevent
+            @keydown.enter.tab.stop.self="addPointerElement($event)"
+            @keydown.delete="removeLastElement()"
+            class="el-input__inner"/>
+          </div>
+          <div v-else>          
+            <input
+              ref="search"
+              :name="inputName"
+              :id="inputId"
+              type="text"
+              autocomplete="off"
+              :placeholder="placeholder"
+              :value="isOpen ? search : currentOptionLabel"
+              :disabled="disabled"
+              @input="updateSearch($event.target.value)"
+              @focus.prevent="activate()"
+              @blur.prevent="deactivate()"
+              @keyup.esc="deactivate()"
+              @keydown.down.prevent="pointerForward()"
+              @keydown.up.prevent="pointerBackward()"
+              @keydown.enter.prevent
+              @keydown.enter.tab.stop.self="addPointerElement($event)"
+              @keydown.delete="removeLastElement()"
+              class="multiselect__input"/>
+          </div>
+        </div>
+            
         <span
           v-if="!searchable"
           class="multiselect__single"
@@ -109,6 +147,11 @@
     name: 'vue-multiselect',
     mixins: [multiselectMixin, pointerMixin],
     props: {
+
+      userOption: {
+        type: Boolean,
+        default: false
+      },
 
       /**
        * name attribute to match optional label element
